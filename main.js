@@ -54234,11 +54234,11 @@ var ProletarianWizardSettingsTab = class extends import_obsidian2.PluginSettingT
     const { containerEl } = this;
     containerEl.empty();
     new import_obsidian2.Setting(containerEl)
-      .setName("Source Directory")
+      .setName("Source Directories")
       .setHeading();
 
     new import_obsidian2.Setting(containerEl)
-      .setName("Source directory")
+      .setName("Source directories")
       .setDesc(
         "The plugin will only load todos from this directory and its subdirectories. Leave empty to load from all files."
       )
@@ -61198,12 +61198,17 @@ var ProletarianWizard = class extends import_obsidian12.Plugin {
 
       if (sourceDir && sourceDir.trim() !== "") {
         // Nếu sourceDir được cấu hình, chỉ lọc các file trong thư mục đó
+         const sourceDirs = sourceDir.split(',').map(dir => dir.trim()).filter(dir => dir); // Tách chuỗi thành mảng, loại bỏ khoảng trắng và các mục rỗng
+        
         this.logger.info(
-          `Loading files only from source directory: ${sourceDir}`
+          `Loading files from source directories: ${sourceDirs.join(', ')}`
         );
         filesToLoad = allFiles
           .map((file) => new ObsidianFile(this.app, file))
-          .filter((obsidianFile) => obsidianFile.isInFolder(sourceDir));
+          .filter((obsidianFile) => 
+            // Kiểm tra xem tệp có nằm trong bất kỳ thư mục nào đã chỉ định không
+            sourceDirs.some(dir => obsidianFile.isInFolder(dir))
+          );
       } else {
         // Nếu không, tải tất cả các file như cũ (hành vi mặc định)
         this.logger.info(`Source directory not set. Loading all files.`);
